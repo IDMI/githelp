@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>ExamDiff Pro Diff Report</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style type="text/css">
+body {font-family: Lucida Console; font-size:13px; font-style: normal; font-weight:400; background-color:#C0C0C0;}
+table {background-color:#FFFFFF;}
+div {font-family: Lucida Console; font-size:13px; font-style: normal; font-weight:400; background-color:#FFFFFF;}
+.header {width:1696px; border: 1px solid #FFFFFF; color:#000000; background-color:#C0C0C0;}
+.linespan_i {height:13px; width:1696px; color:#000000; background-color:#FFFFFF;}
+.linespan_a {height:13px; width:1696px; color:#800000; background-color:#C0C0C0; text-decoration:none;}
+.linespan_d {height:13px; width:1696px; color:#0000FF; background-color:#E0E0E0; text-decoration:none;}
+.linespan_c {height:13px; width:1696px; color:#000080; background-color:#F2F2C6; text-decoration:none;}
+.linespan_n {height:13px; width:1696px; color:#800080; background-color:#A6CAF0; text-decoration:none;}
+.linespan_o {height:13px; width:1696px; color:#FF0000; background-color:#C0DCC0; text-decoration:none;}
+.linespan_i_b {height:1px; width:1696px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color:#000000;}
+.linespan_a_b {height:1px; width:1696px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color:#000000;}
+.linespan_d_b {height:1px; width:1696px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color:#000000;}
+.linespan_c_b {height:1px; width:1696px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color:#000000;}
+.linespan_n_b {height:1px; width:1696px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color:#000000;}
+.linespan_o_b {height:1px; width:1696px; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color:#000000;}
+.linespan_bin {width:1696px; color:#000000; background-color:#FFFFFF;}
+.identical {color:#000000; background-color:#FFFFFF;}
+.added {color:#800000; background-color:#C0C0C0; text-decoration:none;}
+.deleted {color:#0000FF; background-color:#E0E0E0; text-decoration:none;}
+.changed {color:#000080; background-color:#F2F2C6; text-decoration:none;}
+.changed2 {color:#FF0F87; background-color:#E0E0E0; text-decoration:none;}
+.inserted {color:#000000; background-color:#C0C0C0; text-decoration:none;}
+.ignored {color:#008000; background-color:#F0F0F0; text-decoration:none;}
+.newer {color:#800080; background-color:#A6CAF0; text-decoration:none;}
+.older {color:#FF0000; background-color:#C0DCC0; text-decoration:none;}
+
+</style>
+<script type="text/javascript">
+// ##########################################
+// ### Part 1: Basic Javascript #############
+// ##########################################
+
+window.onresize = onLoad;
+var x1scroll = 0, y1scroll = 0,  x2scroll = 0, y2scroll = 0;
+function getViewportHeight()
+{
+	// supported in Mozilla, Opera, and Safari
+	if(window.innerHeight)
+		return window.innerHeight;
+
+	// supported in standards mode of IE, but not in any other mode
+	if(window.document.documentElement.clientHeight)
+		return document.documentElement.clientHeight;
+
+	// supported in quirks mode, older versions of IE, and mac IE (anything else).
+	return window.document.body.clientHeight;
+}
+function getViewportWidth()
+{
+	// supported in Mozilla, Opera, and Safari
+	if(window.innerWidth)
+		return window.innerWidth;
+
+	// supported in standards mode of IE, but not in any other mode
+	if(window.document.documentElement.clientWidth)
+		return document.documentElement.clientWidth;
+
+	// supported in quirks mode, older versions of IE, and mac IE (anything else).
+	return window.document.body.clientWidth;
+}
+function poll(index)
+{
+	var el1, el2;
+	el1 = document.all.d21;
+	el2 = document.all.d22;
+	if (el1.scrollLeft != x1scroll || el1.scrollTop != y1scroll)
+		synchScroll(1);
+	else if (el2.scrollLeft != x2scroll || el2.scrollTop != y2scroll)
+		synchScroll(2);
+}
+function synchScroll(index)
+{
+	var el1, el2;
+	if (document.all)
+	{
+		el1 = document.all.d21;
+		el2 = document.all.d22;
+	}
+	else
+	{
+		el1 = document.getElementById("d21");
+		el2 = document.getElementById("d22");
+	}
+	if (index == 1)
+	{
+		x1scroll = el1.scrollLeft;
+		y1scroll = el1.scrollTop;
+		el2.scrollLeft = x2scroll = x1scroll;
+		el2.scrollTop = y2scroll = y1scroll;
+	}
+	else
+	{
+		x2scroll = el2.scrollLeft;
+		y2scroll = el2.scrollTop;
+		el1.scrollLeft = x1scroll = x2scroll;
+		el1.scrollTop = y1scroll = y2scroll;
+	}
+}
+
+
+// ##########################################
+// ### Part 2: onLoad + Navigation Code #####
+// ##########################################
+
+//
+// event handlers
+//
+function onLoad()
+{
+	var bodyWid = getViewportWidth();
+	var bodyHeight = getViewportHeight();
+	var tableWid = bodyWid - 40, tableHeight = bodyHeight - 130;
+	var tdWid = (tableWid / 2) - 5;
+	var tdHeight = (tableHeight / 2) - 5;
+	populate_combobox(5);
+	if (tdWid > 0 && tdHeight > 0)
+	{
+		if (document.all)
+		{
+			document.all.tmain.style.width = tableWid + 'px';
+			document.all.t11.style.width = tdWid + 'px';
+			document.all.t12.style.width = tdWid + 'px';
+			document.all.d11.style.width = tdWid + 'px';
+			document.all.d12.style.width = tdWid + 'px';
+			document.all.d21.style.height = tableHeight + 'px';
+			document.all.d22.style.height = tableHeight + 'px';
+			document.all.d21.style.width = tdWid + 'px';
+			document.all.d22.style.width = tdWid + 'px';
+		}
+		else
+		{
+			document.getElementById("tmain").style.width = tableWid + 'px';
+			document.getElementById("t11").style.width = tdWid + 'px';
+			document.getElementById("t12").style.width = tdWid + 'px';
+			document.getElementById("d11").style.width = tdWid + 'px';
+			document.getElementById("d12").style.width = tdWid + 'px';
+			document.getElementById("d21").style.height = tableHeight + 'px';
+			document.getElementById("d22").style.height = tableHeight + 'px';
+			document.getElementById("d21").style.width = tdWid + 'px';
+			document.getElementById("d22").style.width = tdWid + 'px';
+		}
+	}
+	if (navigator.userAgent.indexOf("Opera") != -1)
+	{
+		// for sync scrolling
+		window.setInterval("poll()",100);
+	}
+}
+
+function populate_combobox(numdiffs)
+{
+	var combobox = document.getElementById('currentdiff');
+	for(i=1;i<=numdiffs;i+=1)
+	{
+		combobox.options[i] = new Option("Diff #"+i,i);
+	}
+}
+
+function goto(diff)
+{
+	var combobox = document.getElementById('currentdiff');
+	if (diff > 0 && diff < combobox.options.length)
+	{
+		combobox.selectedIndex = diff;
+		window.location.href = "#D" + diff;
+	}
+}
+
+function first()
+{
+	var combobox = document.getElementById('currentdiff');
+	var diff = 1;
+	goto(1);
+}
+function previous()
+{
+	var combobox = document.getElementById('currentdiff');
+	var diff = combobox.selectedIndex;
+	if (diff > 1)
+		diff--;
+	goto(diff);
+}
+function next()
+{
+	var combobox = document.getElementById('currentdiff');
+	var diff = combobox.selectedIndex;
+	if (combobox.options.length - 1 > diff)
+		diff++;
+	goto(diff);
+}
+function last()
+{
+	var combobox = document.getElementById('currentdiff');
+	var diff = combobox.options.length - 1;
+	goto(diff);
+}
+function change()
+{
+	var combobox = document.getElementById('currentdiff');
+	var diff = combobox.selectedIndex;
+	goto(diff);
+}
+
+</script>
+</head>
+<body onload="onLoad()">
+<table id="tmain" style="border: 2px solid #000000; " cellpadding="2">
+	<tr valign="top">
+		<td>
+			<table id="t1">
+				<tr valign="top">
+					<td id="t11" style="border: 1px solid #000000"><div id="d11" style="background-color: #C0C0C0;  overflow: hidden;" title=""><b></b></div></td>
+					<td id="t12" style="border: 1px solid #000000"><div id="d12" style="background-color: #C0C0C0;  overflow: hidden;" title=""><b></b></div></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td>
+			<table id="t2">
+				<tr valign="top">
+					<td id="t21" style="border: 1px solid #000000">
+<div id="d21" style="overflow: scroll;  " onscroll="synchScroll(1)">
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;1&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;2&nbsp;</span><span class="identical">#&nbsp;Virtual&nbsp;Hosts</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;3&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;4&nbsp;</span><span class="identical">#&nbsp;If&nbsp;you&nbsp;want&nbsp;to&nbsp;maintain&nbsp;multiple&nbsp;domains/hostnames&nbsp;on&nbsp;your</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;5&nbsp;</span><span class="identical">#&nbsp;machine&nbsp;you&nbsp;can&nbsp;setup&nbsp;VirtualHost&nbsp;containers&nbsp;for&nbsp;them.&nbsp;Most&nbsp;configurations</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;6&nbsp;</span><span class="identical">#&nbsp;use&nbsp;only&nbsp;name-based&nbsp;virtual&nbsp;hosts&nbsp;so&nbsp;the&nbsp;server&nbsp;doesn't&nbsp;need&nbsp;to&nbsp;worry&nbsp;about</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;7&nbsp;</span><span class="identical">#&nbsp;IP&nbsp;addresses.&nbsp;This&nbsp;is&nbsp;indicated&nbsp;by&nbsp;the&nbsp;asterisks&nbsp;in&nbsp;the&nbsp;directives&nbsp;below.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;8&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;9&nbsp;</span><span class="identical">#&nbsp;Please&nbsp;see&nbsp;the&nbsp;documentation&nbsp;at&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">10&nbsp;</span><span class="identical">#&nbsp;&lt;URL:http://httpd.apache.org/docs/2.2/vhosts/&gt;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">11&nbsp;</span><span class="identical">#&nbsp;for&nbsp;further&nbsp;details&nbsp;before&nbsp;you&nbsp;try&nbsp;to&nbsp;setup&nbsp;virtual&nbsp;hosts.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">12&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">13&nbsp;</span><span class="identical">#&nbsp;You&nbsp;may&nbsp;use&nbsp;the&nbsp;command&nbsp;line&nbsp;option&nbsp;'-S'&nbsp;to&nbsp;verify&nbsp;your&nbsp;virtual&nbsp;host</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">14&nbsp;</span><span class="identical">#&nbsp;configuration.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">15&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">16&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">17&nbsp;</span><span class="identical">#&nbsp;Use&nbsp;name-based&nbsp;virtual&nbsp;hosting.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">18&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">19&nbsp;</span><span class="identical">NameVirtualHost&nbsp;*:80</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">20&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">21&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">22&nbsp;</span><span class="identical">#&nbsp;VirtualHost&nbsp;example:</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">23&nbsp;</span><span class="identical">#&nbsp;Almost&nbsp;any&nbsp;Apache&nbsp;directive&nbsp;may&nbsp;go&nbsp;into&nbsp;a&nbsp;VirtualHost&nbsp;container.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">24&nbsp;</span><span class="identical">#&nbsp;The&nbsp;first&nbsp;VirtualHost&nbsp;section&nbsp;is&nbsp;used&nbsp;for&nbsp;all&nbsp;requests&nbsp;that&nbsp;do&nbsp;not</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">25&nbsp;</span><span class="identical">#&nbsp;match&nbsp;a&nbsp;ServerName&nbsp;or&nbsp;ServerAlias&nbsp;in&nbsp;any&nbsp;&lt;VirtualHost&gt;&nbsp;block.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">26&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">27&nbsp;</span><span class="identical">&lt;VirtualHost&nbsp;*:80&gt;</span></div>
+<div class="linespan_c"><a name="D1"></a><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">28&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ServerAdmin&nbsp;</span><span class="changed2">webmaster</span><span class="changed">@</span><span class="changed2">dummy</span><span class="deleted">-host</span><span class="changed">.</span><span class="changed2">idmi</span><span class="deleted">-biz</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">29&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;DocumentRoot&nbsp;&quot;C:/Program&nbsp;Files&nbsp;(x86)/Apache&nbsp;Software&nbsp;Foundation/Apache2.2/</span><span class="changed2">docs</span><span class="deleted">/dummy-host.idmi-biz</span><span class="changed">&quot;</span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">30&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ServerName&nbsp;</span><span class="changed2">dummy</span><span class="deleted">-host</span><span class="changed">.</span><span class="changed2">idmi</span><span class="changed2">-</span><span class="changed2">biz</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">31&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ServerAlias&nbsp;</span><span class="changed2">www</span><span class="changed">.</span><span class="changed2">dummy</span><span class="deleted">-host</span><span class="changed">.</span><span class="changed2">idmi</span><span class="changed2">-</span><span class="changed2">biz</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">32&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ErrorLog&nbsp;&quot;logs/</span><span class="changed2">dummy</span><span class="deleted">-host.idmi-biz-error</span><span class="changed">.log&quot;</span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">33&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;CustomLog&nbsp;&quot;logs/</span><span class="changed2">dummy</span><span class="deleted">-host.idmi-biz-access</span><span class="changed">.log&quot;&nbsp;common</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">34&nbsp;</span><span class="identical">&lt;/VirtualHost&gt;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">35&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">36&nbsp;</span><span class="identical">&lt;VirtualHost&nbsp;*:80&gt;</span></div>
+<div class="linespan_c"><a name="D2"></a><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">37&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ServerAdmin&nbsp;</span><span class="changed2">webmaster</span><span class="changed">@</span><span class="changed2">dummy</span><span class="deleted">-host2</span><span class="changed">.</span><span class="changed2">idmi</span><span class="deleted">-biz</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">38&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;DocumentRoot&nbsp;&quot;C:</span><span class="changed2">/</span><span class="changed2">Program</span><span class="changed">&nbsp;</span><span class="changed2">Files</span><span class="changed">&nbsp;</span><span class="changed2">(</span><span class="changed2">x86</span><span class="changed2">)</span><span class="changed2">/</span><span class="changed2">Apache</span><span class="changed">&nbsp;</span><span class="deleted">Software&nbsp;Foundation/Apache2.2/docs/dummy-host2.idmi-biz</span><span class="changed">&quot;</span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">39&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ServerName&nbsp;</span><span class="changed2">dummy</span><span class="deleted">-host2</span><span class="changed">.</span><span class="changed2">idmi</span><span class="deleted">-biz</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">40&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="changed2">ErrorLog</span><span class="changed">&nbsp;</span><span class="changed2">&quot;</span><span class="deleted">logs/dummy-host2</span><span class="changed">.</span><span class="changed2">idmi</span><span class="deleted">-biz-error.log&quot;</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">41&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="changed2">CustomLog</span><span class="changed">&nbsp;&quot;logs/</span><span class="changed2">dummy</span><span class="deleted">-host2.idmi-biz-access</span><span class="changed">.log&quot;&nbsp;</span><span class="deleted">common</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">42&nbsp;</span><span class="identical">&lt;/VirtualHost&gt;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">43&nbsp;</span></div>
+<div class="linespan_a"><a name="D3"></a><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">44&nbsp;</span></div>
+<div class="linespan_a"><a name="D4"></a><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">45&nbsp;</span></div>
+<div class="linespan_a"><a name="D5"></a><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;&nbsp;&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">46&nbsp;</span></div>
+</div>
+					</td>
+					<td id="t22" style="border: 1px solid #000000">
+<div id="d22" style="overflow: scroll;  " onscroll="synchScroll(2)">
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;1&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;2&nbsp;</span><span class="identical">#&nbsp;Virtual&nbsp;Hosts</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;3&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;4&nbsp;</span><span class="identical">#&nbsp;If&nbsp;you&nbsp;want&nbsp;to&nbsp;maintain&nbsp;multiple&nbsp;domains/hostnames&nbsp;on&nbsp;your</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;5&nbsp;</span><span class="identical">#&nbsp;machine&nbsp;you&nbsp;can&nbsp;setup&nbsp;VirtualHost&nbsp;containers&nbsp;for&nbsp;them.&nbsp;Most&nbsp;configurations</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;6&nbsp;</span><span class="identical">#&nbsp;use&nbsp;only&nbsp;name-based&nbsp;virtual&nbsp;hosts&nbsp;so&nbsp;the&nbsp;server&nbsp;doesn't&nbsp;need&nbsp;to&nbsp;worry&nbsp;about</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;7&nbsp;</span><span class="identical">#&nbsp;IP&nbsp;addresses.&nbsp;This&nbsp;is&nbsp;indicated&nbsp;by&nbsp;the&nbsp;asterisks&nbsp;in&nbsp;the&nbsp;directives&nbsp;below.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;8&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">&nbsp;9&nbsp;</span><span class="identical">#&nbsp;Please&nbsp;see&nbsp;the&nbsp;documentation&nbsp;at&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">10&nbsp;</span><span class="identical">#&nbsp;&lt;URL:http://httpd.apache.org/docs/2.2/vhosts/&gt;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">11&nbsp;</span><span class="identical">#&nbsp;for&nbsp;further&nbsp;details&nbsp;before&nbsp;you&nbsp;try&nbsp;to&nbsp;setup&nbsp;virtual&nbsp;hosts.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">12&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">13&nbsp;</span><span class="identical">#&nbsp;You&nbsp;may&nbsp;use&nbsp;the&nbsp;command&nbsp;line&nbsp;option&nbsp;'-S'&nbsp;to&nbsp;verify&nbsp;your&nbsp;virtual&nbsp;host</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">14&nbsp;</span><span class="identical">#&nbsp;configuration.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">15&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">16&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">17&nbsp;</span><span class="identical">#&nbsp;Use&nbsp;name-based&nbsp;virtual&nbsp;hosting.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">18&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">19&nbsp;</span><span class="identical">NameVirtualHost&nbsp;*:80</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">20&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">21&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">22&nbsp;</span><span class="identical">#&nbsp;VirtualHost&nbsp;example:</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">23&nbsp;</span><span class="identical">#&nbsp;Almost&nbsp;any&nbsp;Apache&nbsp;directive&nbsp;may&nbsp;go&nbsp;into&nbsp;a&nbsp;VirtualHost&nbsp;container.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">24&nbsp;</span><span class="identical">#&nbsp;The&nbsp;first&nbsp;VirtualHost&nbsp;section&nbsp;is&nbsp;used&nbsp;for&nbsp;all&nbsp;requests&nbsp;that&nbsp;do&nbsp;not</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">25&nbsp;</span><span class="identical">#&nbsp;match&nbsp;a&nbsp;ServerName&nbsp;or&nbsp;ServerAlias&nbsp;in&nbsp;any&nbsp;&lt;VirtualHost&gt;&nbsp;block.</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">26&nbsp;</span><span class="identical">#</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">27&nbsp;</span><span class="identical">&lt;VirtualHost&nbsp;*:80&gt;</span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">28&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ServerAdmin&nbsp;</span><span class="changed2">peyman</span><span class="added">.carlsen</span><span class="changed">@</span><span class="changed2">idminc</span><span class="changed">.</span><span class="changed2">com</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">29&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;DocumentRoot&nbsp;&quot;C:/Program&nbsp;Files&nbsp;(x86)/Apache&nbsp;Software&nbsp;Foundation/Apache2.2/</span><span class="changed2">htdocs</span><span class="changed">&quot;</span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">30&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ServerName&nbsp;</span><span class="changed2">127</span><span class="changed">.</span><span class="changed2">0</span><span class="changed2">.</span><span class="changed2">0</span><span class="added">.1</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">31&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ServerAlias&nbsp;</span><span class="changed2">127</span><span class="changed">.</span><span class="changed2">0</span><span class="changed">.</span><span class="changed2">0</span><span class="changed2">.</span><span class="changed2">1</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">32&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ErrorLog&nbsp;&quot;logs/</span><span class="changed2">localhost_errorLog</span><span class="changed">.log&quot;</span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">33&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;CustomLog&nbsp;&quot;logs/</span><span class="changed2">localhost_errorLog</span><span class="changed">.log&quot;&nbsp;common</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">34&nbsp;</span><span class="identical">&lt;/VirtualHost&gt;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">35&nbsp;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">36&nbsp;</span><span class="identical">&lt;VirtualHost&nbsp;*:80&gt;</span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">37&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ServerAdmin&nbsp;</span><span class="changed2">peyman</span><span class="added">.carlsen</span><span class="changed">@</span><span class="changed2">idminc</span><span class="changed">.</span><span class="changed2">com</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">38&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;DocumentRoot&nbsp;&quot;C:</span><span class="changed2">\</span><span class="changed2">ColdFusion10</span><span class="changed2">\</span><span class="changed2">cfusion</span><span class="changed2">\</span><span class="changed2">wwwroot</span><span class="changed2">\</span><span class="changed2">CFIDE</span><span class="changed">&quot;</span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">39&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;ServerName&nbsp;</span><span class="changed2">localhost</span><span class="changed">.</span><span class="changed2">local</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">40&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="changed2">ServerAlias</span><span class="changed">&nbsp;</span><span class="changed2">localhost</span><span class="changed">.</span><span class="changed2">local</span><span class="changed"></span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">41&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="changed2">ErrorLog</span><span class="changed">&nbsp;&quot;logs/</span><span class="changed2">localhost_errorLog</span><span class="changed">.log&quot;</span></div>
+<div class="linespan_c"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">42&nbsp;</span><span class="changed">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="added">CustomLog&nbsp;&quot;logs/localhost_errorLog.log&quot;&nbsp;common</span><span class="changed"></span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">43&nbsp;</span><span class="identical">&lt;/VirtualHost&gt;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">44&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">45&nbsp;</span><span class="added">#This&nbsp;is&nbsp;jakarta,&nbsp;which&nbsp;is&nbsp;if&nbsp;you&nbsp;have&nbsp;CF10&nbsp;installed.&nbsp;Otherwise,&nbsp;you&nbsp;should&nbsp;not&nbsp;put&nbsp;this</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">46&nbsp;</span><span class="added">&lt;VirtualHost&nbsp;*:80&gt;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">47&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;ServerAdmin&nbsp;peyman.carlsen@idminc.com</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">48&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;DocumentRoot&nbsp;&quot;C:\ColdFusion10\config\wsconfig\1&quot;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">49&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;ServerName&nbsp;localhost.local</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">50&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;ServerAlias&nbsp;localhost.local</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">51&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;ErrorLog&nbsp;&quot;logs/localhost_errorLog.log&quot;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">52&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;CustomLog&nbsp;&quot;logs/localhost_errorLog.log&quot;&nbsp;common</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">53&nbsp;</span><span class="added">&lt;/VirtualHost&gt;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">54&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">55&nbsp;</span><span class="added">#ABOVE&nbsp;ARE&nbsp;STANDARDS&nbsp;AND&nbsp;CAN&nbsp;BE&nbsp;LEFT&nbsp;ALONE&nbsp;AFTER&nbsp;INITIAL&nbsp;SETUP.&nbsp;BELOW&nbsp;IS&nbsp;WHAT</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">56&nbsp;</span><span class="added">#NEEDS&nbsp;TO&nbsp;BE&nbsp;ADDED&nbsp;EVERYTIME&nbsp;YOU&nbsp;ADD&nbsp;A&nbsp;NEW&nbsp;PROJECT</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">57&nbsp;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">58&nbsp;</span><span class="added">&lt;VirtualHost&nbsp;*:80&gt;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">59&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;ServerAdmin&nbsp;peyman.carlsen@idminc.com</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">60&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;DocumentRoot&nbsp;&quot;C:\domains\links&quot;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">61&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;ServerName&nbsp;links.local</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">62&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;ServerAlias&nbsp;links.local</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">63&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;ErrorLog&nbsp;&quot;logs/localhost_errorLog.log&quot;</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">64&nbsp;</span><span class="added">&nbsp;&nbsp;&nbsp;&nbsp;CustomLog&nbsp;&quot;logs/localhost_errorLog.log&quot;&nbsp;common</span></div>
+<div class="linespan_a"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">65&nbsp;</span><span class="added">&lt;/VirtualHost&gt;</span></div>
+<div class="linespan_i"><span style="color:#808080; background-color:#F8F8F8; border-right-width:2px; border-right-style:groove; border-right-color:#E0E0E0;">66&nbsp;</span></div>
+</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td>
+			<table width="100%">
+				<tr valign="top">
+					<td>
+						<table id="t3">
+							<tr valign="top">
+								<td><div><b>Legend:</b></div></td><td><div class="added">Added(19+194)</div></td><td><div class="deleted">Deleted(0+77)</div></td><td><div class="changed">Changed(12)</div></td><td><div class="changed2">Changed words in changed(33)</div></td>
+							</tr>
+						</table>
+					</td>
+					<!-- $NAV_BAR_BEGIN$ -->
+					<td align="right">
+						<table>
+							<tr>
+								<td><input type="button" value="<<" onclick="first()" title="First Difference"/></td>
+								<td><input type="button" value="<" onclick="previous()" title="Previous Difference"/></td>
+								<td>
+									<select align="top" id="currentdiff" size="1" style="width: 70pt;" onchange="change()">
+										<option selected id="1" value="0">Select Diff</option>
+									</select>
+								</td>
+								<td><input type="button" value=">" onclick="next()" title="Next Difference"/></td>
+								<td><input type="button" value=">>" onclick="last()" title="Last Difference"/></td>
+							</tr>
+						</table>
+					</td>
+					<!-- $NAV_BAR_END$ -->
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</body>
+</html>
+
